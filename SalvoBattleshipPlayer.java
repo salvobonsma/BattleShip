@@ -1,7 +1,3 @@
-package Players;
-
-import BattleshipPlayer;
-
 import java.util.HashMap;
 
 public class SalvoBattleshipPlayer extends BattleshipPlayer {

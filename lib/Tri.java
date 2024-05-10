@@ -1,4 +1,4 @@
-package dev.ampersanded.lib;
+package lib;
 
 public class Tri<A, B, C> {
     private final A m_first;

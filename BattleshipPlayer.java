@@ -1,4 +1,3 @@
-package lib;//
 // Source code recreated from a .class file by IntelliJ IDEA
 // (powered by FernFlower decompiler)
 //
@@ -10,7 +9,7 @@ public class BattleshipPlayer {
     }
 
     public int getMove() {
-        return 0;
+        return (int) (Math.random() * 99);
     }
 
     public void response(int location, boolean hit, int sinkLength) {

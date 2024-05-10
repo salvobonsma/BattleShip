@@ -1,4 +1,4 @@
-package dev.ampersanded.lib;
+package lib;
 
 public class Pair<A, B> {
     private final A m_first;
