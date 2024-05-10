@@ -1,46 +1,24 @@
 import java.util.HashMap;
 
-public class SalvoBattleshipPlayer extends BattleshipPlayer {
+public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
+    private final boolean debug = true;
+
     // Opponent data
     private OppBoard board = new OppBoard();
-    private OppType oppType = OppType.UNKNOWN;
 
 
-    public SalvoBattleshipPlayer() {
+    public SalvoBattleshipPlayerV1() {
         System.out.println(board.getBoard());
     }
 
-    public enum Mode {
-        OPP_TYPE_DETECTION,
-        CHECKERBOARD,
-        SHIP_DESTRUCTION
-    }
-
-    public enum OppType {
-        BASIC, // Default battleship opp
-        CHAT_GPT, // Generic Chat GPTed opp
-        UNKNOWN
-    }
-
     public class OppBoard {
-        private HashMap<Location, Square> board = new HashMap<>();
+        private final HashMap<Location, Square> board = new HashMap<>();
 
         public OppBoard() {
-            addRowFor(Letter.A);
-            addRowFor(Letter.B);
-            addRowFor(Letter.C);
-            addRowFor(Letter.D);
-            addRowFor(Letter.E);
-            addRowFor(Letter.F);
-            addRowFor(Letter.G);
-            addRowFor(Letter.H);
-            addRowFor(Letter.I);
-            addRowFor(Letter.J);
-        }
-
-        private void addRowFor(Letter letter) {
-            for (int i = 1; i <= 10; i++) {
-                board.put(new Location(letter, i), Square.UNKNOWN);
+            for (int letter = 0; letter < 10; letter++) {
+                for (int number = 0; number < 10; number++) {
+                    board.put(new Location(letter, number), Square.UNKNOWN);
+                }
             }
         }
 
@@ -60,16 +38,21 @@ public class SalvoBattleshipPlayer extends BattleshipPlayer {
         }
 
         public class Location {
-            private final Letter letter;
+            private final int letter;
             private final int number;
 
             public Location(Letter letter, int number) {
+                this.letter = letter.getI();
+                this.number = number;
+            }
+
+            public Location(int letter, int number) {
                 this.letter = letter;
-                this.number = number - 1;
+                this.number = number;
             }
 
             public int getAsIndex() {
-                return (number * 10) + letter.getI();
+                return (number * 10) + letter;
             }
 
             @Override
@@ -96,5 +79,9 @@ public class SalvoBattleshipPlayer extends BattleshipPlayer {
                 return name();
             }
         }
+    }
+
+    private void debug(String message) {
+        System.out.println(message);
     }
 }
