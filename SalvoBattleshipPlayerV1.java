@@ -8,10 +8,10 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
 
 
     public SalvoBattleshipPlayerV1() {
-        System.out.println(board.getBoard());
+        System.out.println(new OppBoard.Location(31).getAsIndex());
     }
 
-    public class OppBoard {
+    public static class OppBoard {
         private final HashMap<Location, Square> board = new HashMap<>();
 
         public OppBoard() {
@@ -37,7 +37,7 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
             }
         }
 
-        public class Location {
+        public static class Location {
             private final int letter;
             private final int number;
 
@@ -49,6 +49,11 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
             public Location(int letter, int number) {
                 this.letter = letter;
                 this.number = number;
+            }
+
+            public Location(int index) {
+                this.letter = index % 10;
+                this.number = index / 10;
             }
 
             public int getAsIndex() {
