@@ -2,6 +2,7 @@ import lib.Pair;
 import lib.Tri;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Simulator {
     private static BattleshipPlayer p1 = new BattleshipPlayer();
@@ -85,7 +86,7 @@ public class Simulator {
                 Integer pos = boat.getPositions().get(i);
 
                 // Hit
-                if (pos == playerMove) {
+                if (Objects.equals(pos, playerMove)) {
                     boat.getPositions().set(i, null);
 
                     // Check to see if any part of the boat is still alive
