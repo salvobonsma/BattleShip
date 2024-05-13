@@ -2,6 +2,7 @@ import lib.Pair;
 import lib.Tri;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Simulator {
@@ -20,7 +21,7 @@ public class Simulator {
     }
 
     public static void main(String[] args) {
-        int samples = 10000;
+        int samples = 1000;
 
         Pair<PlayerStats, PlayerStats> stats = run(samples);
 
@@ -53,7 +54,14 @@ public class Simulator {
             while (true) {
                 Tri<Integer, Boolean, Integer> response1 = playerMove(p1, p2boats);
 
-                p2Board[]
+                p2Board[response1.getFirst() % 10][response1.getFirst() / 10] = response1.getSecond() ? "X" : "0";
+                for (int row = 0; row < p2Board.length; row++) {
+                    System.out.print(row + " ");
+                    for (int col = 0; col < p2Board[0].length; col++) {
+                        System.out.print(p2Board[row][col]);
+                    }
+                    System.out.println();
+                }
 
                 p1.response(response1.getFirst(), response1.getSecond(), response1.getThird());
                 p2.enemyAttack(response1.getFirst());

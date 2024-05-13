@@ -43,12 +43,14 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
             }
             case BOAT_DESTRUCTION -> {
                 if (lastMoveWasHit) {
+                    Location location = boatDirection.of(lastHit);
+
                     //noinspection DataFlowIssue
-                    yield boatDirection.of(lastHit).getAsIndex();
-                } else {
-                    //noinspection DataFlowIssue
-                    yield boatDirection.opposite().of(firstHitOfBoat).getAsIndex();
+                    if (location.isValid()) yield location.getAsIndex();
                 }
+                boatDirection = boatDirection.opposite();
+                //noinspection DataFlowIssue
+                yield boatDirection.of(firstHitOfBoat).getAsIndex();
             }
         };
     }
@@ -57,21 +59,27 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     public void response(int location, boolean hit, int sinkLength) {
         // debug("Location: %s, Hit: %s, Sunk ship: %s", new Location(location), hit, sinkLength != -1);
 
+        debug("");
+
+        if (!lastMoveWasHit && hit) firstHitOfBoat = new Location(location);
         lastMoveWasHit = hit;
-        if (hit) {
-            lastHit = new Location(location);
-            firstHitOfBoat = new Location(location);
-        }
+        if (hit) lastHit = new Location(location);
         if (sinkLength != -1) {
             mode = Mode.HUNTING;
             firstHitOfBoat = null;
+            return;
         }
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
 
-        if (mode == Mode.BOAT_DIRECTION && hit) {
-            boatDirection = attemptedDirections.get(attemptedDirections.size() - 1);
-            attemptedDirections = new ArrayList<>();
-            mode = Mode.BOAT_DESTRUCTION;
+        if (hit) {
+            switch (mode) {
+                case HUNTING -> mode = Mode.BOAT_DIRECTION;
+                case BOAT_DIRECTION -> {
+                    boatDirection = attemptedDirections.get(attemptedDirections.size() - 1);
+                    attemptedDirections = new ArrayList<>();
+                    mode = Mode.BOAT_DESTRUCTION;
+                }
+            }
         }
 
         super.response(location, hit, sinkLength);
@@ -120,8 +128,10 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
                 case WEST -> new Location(location.letter, location.number - 1);
             };
 
+            System.out.println(this + " " + location + " " + newLocation);
+
             if (!newLocation.isValid()) return null;
-            return location;
+            return newLocation;
         }
     }
 
