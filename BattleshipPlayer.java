@@ -21,10 +21,10 @@ public class BattleshipPlayer {
     public ArrayList<Boat> getShips(int[] sizes) {
         ArrayList<Boat> ships = new ArrayList();
         ships.add(new Boat(new int[]{0, 1}));
-        ships.add(new Boat(new int[]{2, 3, 4}));
+        ships.add(new Boat(new int[]{32, 33, 34}));
         ships.add(new Boat(new int[]{5, 6, 7}));
-        ships.add(new Boat(new int[]{10, 11, 12, 13}));
-        ships.add(new Boat(new int[]{14, 15, 16, 17, 18}));
+        ships.add(new Boat(new int[]{50, 51, 52, 53}));
+        ships.add(new Boat(new int[]{80, 81, 82, 83, 84}));
         return ships;
     }
 }

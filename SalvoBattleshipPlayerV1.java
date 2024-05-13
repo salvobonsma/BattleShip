@@ -13,51 +13,73 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     private final ArrayList<Integer> boatSizesLeft = new ArrayList<>();
 
     // Boat Direction
-    private BoatDirection boatDirection = BoatDirection.UNKNOWN;
+    private BoatDirection boatDirection;
     private ArrayList<BoatDirection> attemptedDirections = new ArrayList<>();
 
-    private Location lastMove = new Location(0);
+    private Location firstHitOfBoat = new Location(0);
+    private Location lastHit = new Location(0);
     private boolean lastMoveWasHit = false;
-
-    public SalvoBattleshipPlayerV1() {
-        ProbabilityMatrix probabilityMatrix = new ProbabilityMatrix(oppBoard, new ArrayList<>(List.of(2, 3, 3, 4, 5)));
-        System.out.println(probabilityMatrix.nextMove());
-    }
 
     @Override
     public int getMove() {
         return switch (mode) {
             case HUNTING -> new ProbabilityMatrix(oppBoard, boatSizesLeft).nextMove().getAsIndex();
-            case BOAT_DIRECTION -> 0;
-            case BOAT_DESTRUCTION -> 0;
+            case BOAT_DIRECTION -> {
+                for (BoatDirection direction : BoatDirection.values()) {
+                    if (!attemptedDirections.contains(direction)) {
+                        attemptedDirections.add(direction);
+
+                        Location nextMove = direction.of(lastHit);
+                        if (nextMove == null) {
+                            yield getMove();
+                        } else {
+                            yield nextMove.getAsIndex();
+                        }
+                    }
+                }
+
+                // This should never be reached.
+                yield 0;
+            }
+            case BOAT_DESTRUCTION -> {
+                if (lastMoveWasHit) {
+                    //noinspection DataFlowIssue
+                    yield boatDirection.of(lastHit).getAsIndex();
+                } else {
+                    //noinspection DataFlowIssue
+                    yield boatDirection.opposite().of(firstHitOfBoat).getAsIndex();
+                }
+            }
         };
     }
 
     @Override
     public void response(int location, boolean hit, int sinkLength) {
-        lastMove = new Location(location);
+        // debug("Location: %s, Hit: %s, Sunk ship: %s", new Location(location), hit, sinkLength != -1);
 
-        switch (mode) {
-            case BOAT_DIRECTION -> {
-                if (hit) {
-                    boatDirection = attemptedDirections.get(attemptedDirections.size() - 1);
-                    mode = Mode.BOAT_DESTRUCTION;
-                }
-            }
-            case BOAT_DESTRUCTION -> {
-
-            }
+        lastMoveWasHit = hit;
+        if (hit) {
+            lastHit = new Location(location);
+            firstHitOfBoat = new Location(location);
         }
-
-        if (sinkLength != -1) mode = Mode.HUNTING;
+        if (sinkLength != -1) {
+            mode = Mode.HUNTING;
+            firstHitOfBoat = null;
+        }
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
+
+        if (mode == Mode.BOAT_DIRECTION && hit) {
+            boatDirection = attemptedDirections.get(attemptedDirections.size() - 1);
+            attemptedDirections = new ArrayList<>();
+            mode = Mode.BOAT_DESTRUCTION;
+        }
 
         super.response(location, hit, sinkLength);
     }
 
     @Override
     public void enemyAttack(int location) {
-        debug("Opponent played: %s", new Location(location).toString());
+        // debug("Opponent played: %s", new Location(location).toString());
     }
 
     @Override
@@ -79,8 +101,28 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
         NORTH,
         EAST,
         SOUTH,
-        WEST,
-        UNKNOWN
+        WEST;
+
+        public BoatDirection opposite() {
+            return switch (this) {
+                case NORTH -> SOUTH;
+                case EAST -> WEST;
+                case SOUTH -> NORTH;
+                case WEST -> EAST;
+            };
+        }
+
+        public Location of(Location location) {
+            Location newLocation = switch (this) {
+                case NORTH -> new Location(location.letter - 1, location.number);
+                case EAST -> new Location(location.letter, location.number + 1);
+                case SOUTH -> new Location(location.letter + 1, location.number);
+                case WEST -> new Location(location.letter, location.number - 1);
+            };
+
+            if (!newLocation.isValid()) return null;
+            return location;
+        }
     }
 
     public static class ProbabilityMatrix {
@@ -149,8 +191,8 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
             ArrayList<Pair<Location, Integer>> locations = new ArrayList<>();
             for (int y = 0; y < matrix.length; y++) {
                 for (int x = 0; x < matrix[0].length; x++) {
-                    if (matrix[x][y] == null) continue;
-                    locations.add(Pair.of(new Location(y, x), matrix[x][y]));
+                    if (matrix[y][x] == null) continue;
+                    locations.add(Pair.of(new Location(y, x), matrix[y][x]));
                 }
             }
 
@@ -196,6 +238,10 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
 
         public double distanceToCenter() {
             return Math.sqrt(Math.pow(letter - 4, 2) + Math.pow(number - 4, 2));
+        }
+
+        public boolean isValid() {
+            return letter >= 0 && letter < 10 && number >= 0 && number < 10;
         }
 
         public int getAsIndex() {

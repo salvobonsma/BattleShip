@@ -12,7 +12,7 @@ public class Simulator {
     private static ArrayList<Boat> p2boats = new ArrayList<>();
 
     public static void initializeGame() {
-        p1 = new BattleshipPlayer();
+        p1 = new SalvoBattleshipPlayerV1();
         p2 = new BattleshipPlayer();
 
         p1boats = p1.getShips(new int[]{2, 3, 3, 4, 5});
@@ -20,22 +20,21 @@ public class Simulator {
     }
 
     public static void main(String[] args) {
-        new SalvoBattleshipPlayerV1();
-//        int samples = 1;
-//
-//        Pair<PlayerStats, PlayerStats> stats = run(samples);
-//
-//        System.out.printf("%d samples%n%n", samples);
-//
-//        System.out.printf("Player 1: %s%n", stats.getFirst());
-//        System.out.printf("Player 2: %s%n", stats.getSecond());
-//
-//        System.out.print(stats.getFirst().getWins() > stats.getSecond().getWins() ? "Player 1 won" : "Player 2 won");
-//        System.out.printf(" by %.2f percent.",
-//                (stats.getFirst().getWins() > stats.getSecond().getWins() ?
-//                        (double) stats.getFirst().getWins() / samples :
-//                        (double) stats.getSecond().getWins() / samples) * 100
-//        );
+        int samples = 10000;
+
+        Pair<PlayerStats, PlayerStats> stats = run(samples);
+
+        System.out.printf("%d samples%n%n", samples);
+
+        System.out.printf("Player 1: %s%n", stats.getFirst());
+        System.out.printf("Player 2: %s%n", stats.getSecond());
+
+        System.out.print(stats.getFirst().getWins() > stats.getSecond().getWins() ? "Player 1 won" : "Player 2 won");
+        System.out.printf(" by %.2f percent.",
+                (stats.getFirst().getWins() > stats.getSecond().getWins() ?
+                        (double) stats.getFirst().getWins() / samples :
+                        (double) stats.getSecond().getWins() / samples) * 100
+        );
     }
 
     public static Pair<PlayerStats, PlayerStats> run(int samples) {
@@ -43,8 +42,19 @@ public class Simulator {
 
         for (int i = 0; i < samples; i++) {
             initializeGame();
+
+            String[][] p2Board = new String[10][10];
+            for (int row = 0; row < p2Board.length; row++) {
+                for (int col = 0; col < p2Board[0].length; col++) {
+                    p2Board[row][col] = " ";
+                }
+            }
+
             while (true) {
                 Tri<Integer, Boolean, Integer> response1 = playerMove(p1, p2boats);
+
+                p2Board[]
+
                 p1.response(response1.getFirst(), response1.getSecond(), response1.getThird());
                 p2.enemyAttack(response1.getFirst());
 
@@ -56,6 +66,7 @@ public class Simulator {
 
                 if (hasNoBoatsLeft(p2boats)) {
                     playerStats.getFirst().newWin();
+                    playerStats.getSecond().newLoss();
                     break;
                 }
 
@@ -71,6 +82,7 @@ public class Simulator {
 
                 if (hasNoBoatsLeft(p1boats)) {
                     playerStats.getSecond().newWin();
+                    playerStats.getFirst().newLoss();
                     break;
                 }
             }
@@ -133,6 +145,10 @@ public class Simulator {
 
         public void newWin() {
             wins++;
+            count++;
+        }
+
+        public void newLoss() {
             count++;
         }
 
