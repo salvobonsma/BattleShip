@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Simulator {
-    private static BattleshipPlayer p1 = new BattleshipPlayer();
+    private static BattleshipPlayer p1;
     private static ArrayList<Boat> p1boats = new ArrayList<>();
 
-    private static BattleshipPlayer p2 = new BattleshipPlayer();
+    private static BattleshipPlayer p2;
     private static ArrayList<Boat> p2boats = new ArrayList<>();
 
     public static void initializeGame() {
@@ -20,21 +20,22 @@ public class Simulator {
     }
 
     public static void main(String[] args) {
-        int samples = 100000;
-
-        Pair<PlayerStats, PlayerStats> stats = run(samples);
-
-        System.out.printf("%d samples%n%n", samples);
-
-        System.out.printf("Player 1: %s%n", stats.getFirst());
-        System.out.printf("Player 2: %s%n", stats.getSecond());
-
-        System.out.print(stats.getFirst().getWins() > stats.getSecond().getWins() ? "Player 1 won" : "Player 2 won");
-        System.out.printf(" by %.2f percent.",
-                (stats.getFirst().getWins() > stats.getSecond().getWins() ?
-                        (double) stats.getFirst().getWins() / samples :
-                        (double) stats.getSecond().getWins() / samples) * 100
-        );
+        new SalvoBattleshipPlayerV1();
+//        int samples = 1;
+//
+//        Pair<PlayerStats, PlayerStats> stats = run(samples);
+//
+//        System.out.printf("%d samples%n%n", samples);
+//
+//        System.out.printf("Player 1: %s%n", stats.getFirst());
+//        System.out.printf("Player 2: %s%n", stats.getSecond());
+//
+//        System.out.print(stats.getFirst().getWins() > stats.getSecond().getWins() ? "Player 1 won" : "Player 2 won");
+//        System.out.printf(" by %.2f percent.",
+//                (stats.getFirst().getWins() > stats.getSecond().getWins() ?
+//                        (double) stats.getFirst().getWins() / samples :
+//                        (double) stats.getSecond().getWins() / samples) * 100
+//        );
     }
 
     public static Pair<PlayerStats, PlayerStats> run(int samples) {
@@ -59,8 +60,8 @@ public class Simulator {
                 }
 
                 Tri<Integer, Boolean, Integer> response2 = playerMove(p2, p1boats);
-                p1.response(response2.getFirst(), response2.getSecond(), response2.getThird());
-                p2.enemyAttack(response2.getFirst());
+                p2.response(response2.getFirst(), response2.getSecond(), response2.getThird());
+                p1.enemyAttack(response2.getFirst());
 
                 if (response2.getSecond()) {
                     playerStats.getSecond().newHit();
