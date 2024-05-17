@@ -6,7 +6,11 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     @SuppressWarnings("FieldCanBeLocal")
     private final boolean debug = true;
 
-    private Mode mode = Mode.HUNTING;
+    private static ArrayList<HashMap<Location, Square>> historicalBoard = new ArrayList<>();
+    private static int repeatCount = 0;
+    private static int gameIndex = -1;
+
+    private Mode mode = repeatCount > 2 ? Mode.STATIC_BOATS : Mode.HUNTING;
     private final HashMap<Location, Square> oppBoard = new HashMap<>();
 
     // Hunting
@@ -14,75 +18,98 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
 
     // Boat Direction
     private BoatDirection boatDirection;
+    private boolean alreadyFlipped = true;
     private ArrayList<BoatDirection> attemptedDirections = new ArrayList<>();
 
     private Location firstHitOfBoat = new Location(0);
     private Location lastHit = new Location(0);
     private boolean lastMoveWasHit = false;
 
+    public SalvoBattleshipPlayerV1() {
+        gameIndex++;
+    }
+
     @Override
     public int getMove() {
-        return switch (mode) {
-            case HUNTING -> new ProbabilityMatrix(oppBoard, boatSizesLeft).nextMove().getAsIndex();
-            case BOAT_DIRECTION -> {
+        switch (mode) {
+            case STATIC_BOATS:
+                return 0;
+            case HUNTING:
+                return new ProbabilityMatrix(oppBoard, boatSizesLeft).nextMove().getAsIndex();
+            case BOAT_DIRECTION:
+                alreadyFlipped = false;
+
                 for (BoatDirection direction : BoatDirection.values()) {
                     if (!attemptedDirections.contains(direction)) {
                         attemptedDirections.add(direction);
 
                         Location nextMove = direction.of(lastHit);
                         if (nextMove == null) {
-                            yield getMove();
+                            return getMove();
                         } else {
-                            yield nextMove.getAsIndex();
+                            return nextMove.getAsIndex();
                         }
                     }
                 }
 
                 // This should never be reached.
-                yield 0;
-            }
-            case BOAT_DESTRUCTION -> {
+                break;
+            case BOAT_DESTRUCTION:
                 if (lastMoveWasHit) {
                     Location location = boatDirection.of(lastHit);
 
-                    //noinspection DataFlowIssue
-                    if (location.isValid()) yield location.getAsIndex();
+                    if (location != null) return location.getAsIndex();
                 }
+
+                if (alreadyFlipped) {
+                    mode = Mode.BOAT_DIRECTION;
+                    return getMove();
+                }
+
+                alreadyFlipped = true;
+
                 boatDirection = boatDirection.opposite();
                 //noinspection DataFlowIssue
-                yield boatDirection.of(firstHitOfBoat).getAsIndex();
-            }
-        };
+                return boatDirection.of(firstHitOfBoat).getAsIndex();
+        }
+
+        return 0;
     }
 
     @Override
     public void response(int location, boolean hit, int sinkLength) {
         // debug("Location: %s, Hit: %s, Sunk ship: %s", new Location(location), hit, sinkLength != -1);
 
-        debug("");
-
         if (!lastMoveWasHit && hit) firstHitOfBoat = new Location(location);
         lastMoveWasHit = hit;
         if (hit) lastHit = new Location(location);
-        if (sinkLength != -1) {
-            mode = Mode.HUNTING;
-            firstHitOfBoat = null;
-            return;
-        }
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
 
         if (hit) {
             switch (mode) {
-                case HUNTING -> mode = Mode.BOAT_DIRECTION;
-                case BOAT_DIRECTION -> {
+                case HUNTING:
+                    mode = Mode.BOAT_DIRECTION;
+                    for (BoatDirection direction : BoatDirection.values()) {
+                        Square square = oppBoard.get(direction.of(firstHitOfBoat));
+                        if (square == null) continue;
+                        if (square.equals(Square.HIT) || square.equals(Square.MISS))
+                            attemptedDirections.add(direction);
+                    }
+                    break;
+                case BOAT_DIRECTION:
                     boatDirection = attemptedDirections.get(attemptedDirections.size() - 1);
                     attemptedDirections = new ArrayList<>();
                     mode = Mode.BOAT_DESTRUCTION;
-                }
+                    break;
             }
         }
 
-        super.response(location, hit, sinkLength);
+        if (sinkLength != -1) {
+            debug("Boat of length %d down!", sinkLength);
+            mode = Mode.HUNTING;
+            lastMoveWasHit = false;
+            firstHitOfBoat = null;
+        }
     }
 
     @Override
@@ -100,6 +127,7 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     }
 
     public enum Mode {
+        STATIC_BOATS,
         HUNTING,
         BOAT_DIRECTION,
         BOAT_DESTRUCTION
@@ -112,23 +140,24 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
         WEST;
 
         public BoatDirection opposite() {
-            return switch (this) {
-                case NORTH -> SOUTH;
-                case EAST -> WEST;
-                case SOUTH -> NORTH;
-                case WEST -> EAST;
+            switch (this) {
+                case NORTH: return SOUTH;
+                case EAST: return WEST;
+                case SOUTH: return NORTH;
+                case WEST: return EAST;
             };
+
+            return null;
         }
 
         public Location of(Location location) {
-            Location newLocation = switch (this) {
-                case NORTH -> new Location(location.letter - 1, location.number);
-                case EAST -> new Location(location.letter, location.number + 1);
-                case SOUTH -> new Location(location.letter + 1, location.number);
-                case WEST -> new Location(location.letter, location.number - 1);
+            Location newLocation = new Location(0);
+            switch (this) {
+                case NORTH: newLocation = new Location(location.letter - 1, location.number); break;
+                case EAST: newLocation = new Location(location.letter, location.number + 1); break;
+                case SOUTH: newLocation = new Location(location.letter + 1, location.number); break;
+                case WEST: newLocation = new Location(location.letter, location.number - 1); break;
             };
-
-            System.out.println(this + " " + location + " " + newLocation);
 
             if (!newLocation.isValid()) return null;
             return newLocation;

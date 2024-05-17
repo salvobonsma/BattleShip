@@ -2,7 +2,6 @@ import lib.Pair;
 import lib.Tri;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Simulator {
@@ -21,7 +20,7 @@ public class Simulator {
     }
 
     public static void main(String[] args) {
-        int samples = 1000;
+        int samples = 1;
 
         Pair<PlayerStats, PlayerStats> stats = run(samples);
 
@@ -106,6 +105,8 @@ public class Simulator {
             for (int i = 0; i < boat.getPositions().size(); i++) {
                 Integer pos = boat.getPositions().get(i);
 
+                if (pos != null && pos.equals(12)) System.out.println("test");
+
                 // Hit
                 if (Objects.equals(pos, playerMove)) {
                     boat.getPositions().set(i, null);
@@ -166,15 +167,7 @@ public class Simulator {
 
         @Override
         public String toString() {
-            return String.format("""
-                    
-                    
-                    Avg. Hits: %.2f
-                    Avg. Misses: %.2f
-                    H/M: %.2f
-                    
-                    Wins: %d
-                    """,
+            return String.format("\n\nAvg. Hits: %.2f\nAvg. Misses: %.2f\nH/M: %.2f\n\n\nWins: %d",
                     hits / count,
                     misses / count,
                     (hits / count) / (misses / count),
