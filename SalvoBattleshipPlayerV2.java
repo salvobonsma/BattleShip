@@ -1,6 +1,9 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
-public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
+public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
     @SuppressWarnings("FieldCanBeLocal")
     private boolean debug = false;
 
@@ -8,7 +11,7 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     private static int repeatCount = 0;
     private static int gameIndex = -1;
 
-    private Mode mode = repeatCount > 2 ? Mode.STATIC_BOATS : Mode.HUNTING;
+    private Mode mode = Mode.HUNTING;
     private final HashMap<Location, Square> oppBoard = new HashMap<>();
 
     // Hunting
@@ -23,19 +26,19 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     private Location lastHit = new Location(0);
     private boolean lastMoveWasHit = false;
 
-    public SalvoBattleshipPlayerV1() {
+    public SalvoBattleshipPlayerV2() {
         gameIndex++;
+
+        historicalBoard.add(new HashMap<>());
     }
 
-    public SalvoBattleshipPlayerV1(boolean debug) {
+    public SalvoBattleshipPlayerV2(boolean debug) {
         super();
         this.debug = debug;
     }
 
     @Override
     public int getMove() {
-        debug("");
-
         switch (mode) {
             case STATIC_BOATS:
                 return 0;
@@ -93,6 +96,8 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
         lastMoveWasHit = hit;
         if (hit) lastHit = new Location(location);
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
+
+        historicalBoard.set(gameIndex, oppBoard);
 
         if (hit) {
             switch (mode) {
@@ -161,7 +166,7 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     }
 
     private Location random(Location location) {
-        if (oppBoard.get(location) == null || oppBoard.get(location).equals(Square.UNKNOWN)) return location;
+        if (oppBoard.get(location) == null) return location;
 
         return new Location((int) (Math.random() * 100));
     }
@@ -212,10 +217,6 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
                 for (int y = 0; y < matrix[0].length; y++) {
                     matrix[y][x] = 0;
                 }
-            }
-
-            for (Map.Entry<Location, Square> entry : oppBoard.entrySet()) {
-                if (!entry.getValue().equals(Square.UNKNOWN)) matrix[entry.getKey().letter][entry.getKey().number] = null;
             }
 
             for (int boatLength : boatSizesLeft) {
@@ -286,7 +287,6 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     }
 
     public enum Square {
-        UNKNOWN,
         MISS,
         HIT;
 

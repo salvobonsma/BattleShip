@@ -12,7 +12,7 @@ public class Simulator {
     private static ArrayList<Boat> p2boats = new ArrayList<>();
 
     public static void initializeGame() {
-        p1 = new SalvoBattleshipPlayerV1();
+        p1 = new SalvoBattleshipPlayerV2(true);
         p2 = new BattleshipPlayer();
 
         p1boats = p1.getShips(new int[]{2, 3, 3, 4, 5});
