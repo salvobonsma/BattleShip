@@ -12,15 +12,15 @@ public class Simulator {
     private static ArrayList<Boat> p2boats = new ArrayList<>();
 
     public static void initializeGame() {
-        p1 = new SalvoBattleshipPlayerV2(true);
-        p2 = new BattleshipPlayer();
+        p1 = new SalvoBattleshipPlayerV3();
+        p2 = new SalvoBattleshipPlayerV1();
 
         p1boats = p1.getShips(new int[]{2, 3, 3, 4, 5});
         p2boats = p2.getShips(new int[]{2, 3, 3, 4, 5});
     }
 
     public static void main(String[] args) {
-        int samples = 1;
+        int samples = 3;
 
         Pair<PlayerStats, PlayerStats> stats = run(samples);
 

@@ -11,7 +11,7 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
     private static int repeatCount = 0;
     private static int gameIndex = -1;
 
-    private Mode mode = Mode.HUNTING;
+    private Mode mode = repeatCount > 2 ? Mode.STATIC_BOATS : Mode.HUNTING;
     private final HashMap<Location, Square> oppBoard = new HashMap<>();
 
     // Hunting
@@ -28,8 +28,6 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
 
     public SalvoBattleshipPlayerV2() {
         gameIndex++;
-
-        historicalBoard.add(new HashMap<>());
     }
 
     public SalvoBattleshipPlayerV2(boolean debug) {
@@ -39,6 +37,8 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
 
     @Override
     public int getMove() {
+        debug("");
+
         switch (mode) {
             case STATIC_BOATS:
                 return 0;
@@ -96,8 +96,6 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
         lastMoveWasHit = hit;
         if (hit) lastHit = new Location(location);
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
-
-        historicalBoard.set(gameIndex, oppBoard);
 
         if (hit) {
             switch (mode) {
@@ -166,7 +164,7 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
     }
 
     private Location random(Location location) {
-        if (oppBoard.get(location) == null) return location;
+        if (oppBoard.get(location) == null || oppBoard.get(location).equals(Square.UNKNOWN)) return location;
 
         return new Location((int) (Math.random() * 100));
     }
@@ -217,6 +215,10 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
                 for (int y = 0; y < matrix[0].length; y++) {
                     matrix[y][x] = 0;
                 }
+            }
+
+            for (Map.Entry<Location, Square> entry : oppBoard.entrySet()) {
+                if (!entry.getValue().equals(Square.UNKNOWN)) matrix[entry.getKey().letter][entry.getKey().number] = null;
             }
 
             for (int boatLength : boatSizesLeft) {
@@ -287,6 +289,7 @@ public class SalvoBattleshipPlayerV2 extends BattleshipPlayer {
     }
 
     public enum Square {
+        UNKNOWN,
         MISS,
         HIT;
 

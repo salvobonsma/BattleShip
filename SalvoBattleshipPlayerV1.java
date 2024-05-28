@@ -28,7 +28,7 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
     }
 
     public SalvoBattleshipPlayerV1(boolean debug) {
-        super();
+        this();
         this.debug = debug;
     }
 
@@ -149,11 +149,11 @@ public class SalvoBattleshipPlayerV1 extends BattleshipPlayer {
                 boats.add(new Boat(59, 69, 79, 89, 99));
                 break;
             case 1:
-                boats.add(new Boat(6, 16));
-                boats.add(new Boat(8, 18, 28));
-                boats.add(new Boat(49, 48, 47));
-                boats.add(new Boat(66, 76, 86, 96));
-                boats.add(new Boat(58, 68, 78, 88, 98));
+                boats.add(new Boat(38, 39));
+                boats.add(new Boat(9, 19, 29));
+                boats.add(new Boat(7, 17, 27));
+                boats.add(new Boat(67, 77, 87, 97));
+                boats.add(new Boat(59, 69, 79, 89, 99));
                 break;
         }
 

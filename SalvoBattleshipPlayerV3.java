@@ -51,8 +51,8 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
 
     @Override
     public int getMove() {
-
         debug(gameIndex + "");
+
         switch (mode) {
             case STATIC_BOATS:
                 return 0;
@@ -182,7 +182,7 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
     }
 
     private Location random(Location location) {
-        if (oppBoard.get(location) == null) return location;
+        if (oppBoard.get(location) == null || oppBoard.get(location).equals(Square.UNKNOWN)) return location;
 
         return new Location((int) (Math.random() * 100));
     }
@@ -233,6 +233,10 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
                 for (int y = 0; y < matrix[0].length; y++) {
                     matrix[y][x] = 0;
                 }
+            }
+
+            for (Map.Entry<Location, Square> entry : oppBoard.entrySet()) {
+                if (!entry.getValue().equals(Square.UNKNOWN)) matrix[entry.getKey().letter][entry.getKey().number] = null;
             }
 
             for (int boatLength : boatSizesLeft) {
@@ -303,6 +307,7 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
     }
 
     public enum Square {
+        UNKNOWN,
         MISS,
         HIT;
 
