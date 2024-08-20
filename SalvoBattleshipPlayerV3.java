@@ -7,8 +7,8 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
     @SuppressWarnings("FieldCanBeLocal")
     private boolean debug = false;
 
-    private static ArrayList<HashMap<Location, Square>> historicalBoard = new ArrayList<>();
-    private static int repeatCount = 0;
+//    private static ArrayList<HashMap<Location, Square>> historicalBoard = new ArrayList<>();
+//    private static int repeatCount = 0;
     private static int gameIndex = -1;
 
     private Mode mode = Mode.HUNTING;
@@ -29,7 +29,7 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
     public SalvoBattleshipPlayerV3() {
         gameIndex++;
 
-        historicalBoard.add(new HashMap<>());
+//        historicalBoard.add(new HashMap<>());
 //
 //        if (gameIndex < 2) return;
 //
@@ -111,7 +111,7 @@ public class SalvoBattleshipPlayerV3 extends BattleshipPlayer {
         if (hit) lastHit = new Location(location);
         oppBoard.put(new Location(location), hit ? Square.HIT : Square.MISS);
 
-        historicalBoard.set(gameIndex, oppBoard);
+//        historicalBoard.set(gameIndex, oppBoard);
 
         if (hit) {
             switch (mode) {
